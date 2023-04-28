@@ -2,10 +2,9 @@ package com.analytics;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class AnalyticsApplication extends SpringBootServletInitializer {
+public class AnalyticsApplication {
     public static void main(String[] args) {
 
         System.out.println("Starting the analytics application. Enjoy!");

@@ -46,3 +46,5 @@ Swagger-UI has been integrated with the application.
 
 You can test the APIs using:
 http://localhost:8081/swagger-ui/index.html#
+
+The results directory contains the screenshots of all the valid responses from the APIs. 

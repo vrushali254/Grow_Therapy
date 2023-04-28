@@ -29,14 +29,13 @@ public class PageviewsController {
      *
      * @return
      * 		200 - returns an array of most viewed articles
-     * 		422 - validation errors from the input parameters
+     * 		400, 404, 429 - possible response errors from the 3rd API
      */
     @RequestMapping(value =  {"/articles/top/{granularity}/{year}/{month}/{day}"}, method = RequestMethod.GET)
     public TopArticlesResponse getMostViewedArticles(@PathVariable(name="granularity", required = true) Granularity granularity,
                                                      @PathVariable(name="year", required = true) String year,
                                                      @PathVariable(name="month", required = true) String month,
-                                                     @PathVariable(name ="day", required = true) String day,
-                                                     @RequestParam(name="limit", required = true, defaultValue = "1000") Integer limit) throws RuntimeException, ExecutionException, InterruptedException, IOException {
+                                                     @PathVariable(name ="day", required = true) String day) throws RuntimeException, ExecutionException, InterruptedException, IOException {
         return articlesManager.findMostViewedArticlesByGranularity(granularity, year, month, day);
 
     }
@@ -51,7 +50,7 @@ public class PageviewsController {
      *
      * @return
      * 		200 - returns an array of page views for an article
-     * 		422 - validation errors from the input parameters
+     * 		400, 404, 429 - possible response errors from the 3rd API
      */
     @RequestMapping(value =  "/articles/{articleId}/pageviews/{granularity}/{start_date}", method = RequestMethod.GET)
     public ArticleResponse getViewCountForArticle(@PathVariable(name = "articleId", required = true) String articleId,
@@ -70,7 +69,7 @@ public class PageviewsController {
      *
      * @return
      * 		200 - returns an array of page views for an article
-     * 		422 - validation errors from the input parameters
+     * 		400, 404, 429 - possible response errors from the 3rd API
      */
     @RequestMapping(value = "/articles/{articleId}/top/daily/{start_date}", method = RequestMethod.GET)
     public ArticleResponse.ArticlePageView getDayWithMostViewCountForArticle(
