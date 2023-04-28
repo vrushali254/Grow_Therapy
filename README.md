@@ -74,3 +74,6 @@ Swagger-UI has been integrated with the application.
 You can test the APIs using:
 
 http://localhost:8081/swagger-ui/index.html#/ 
+
+## Testing the application:
+A war file is also present under the artifacts sub-directory to natively configure and deploy the application on Tomcat.
