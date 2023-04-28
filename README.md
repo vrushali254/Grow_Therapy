@@ -50,12 +50,17 @@ Please clone the repository using:
    * Go to File > Open > Select Grow_Therapy
 3. Import project dependencies using Maven
    *  Right-click on the pom.xml > Run Maven > Re-import 
-   * ![Screenshot 2023-04-28 at 11.59.56 AM.png](..%2F..%2F..%2F..%2Fvar%2Ffolders%2F5g%2Fr17cg8c12zq7pnkdv4h0j4s40000gn%2FT%2FTemporaryItems%2FNSIRD_screencaptureui_F5L45C%2FScreenshot%202023-04-28%20at%2011.59.56%20AM.png)
+
+<img width="712" alt="Screenshot 2023-04-28 at 12 07 07 PM" src="https://user-images.githubusercontent.com/22159825/235232474-c51d9b34-cb40-48a1-ab15-ac2fec0a12d6.png">
+
 4. Run AnalyticsApplication.java
-![Screenshot 2023-04-28 at 12.01.14 PM.png](..%2F..%2F..%2F..%2Fvar%2Ffolders%2F5g%2Fr17cg8c12zq7pnkdv4h0j4s40000gn%2FT%2FTemporaryItems%2FNSIRD_screencaptureui_JWHHCX%2FScreenshot%202023-04-28%20at%2012.01.14%20PM.png)
+
+<img width="660" alt="Screenshot 2023-04-28 at 12 07 30 PM" src="https://user-images.githubusercontent.com/22159825/235232526-4988ed71-74ed-4ea2-b196-728758f068cc.png">
+
 
 5. The application should start running on port 8081
-![Screenshot 2023-04-28 at 12.03.27 PM.png](..%2FScreenshot%202023-04-28%20at%2012.03.27%20PM.png)
+
+<img width="1492" alt="Screenshot 2023-04-28 at 12 03 27 PM" src="https://user-images.githubusercontent.com/22159825/235232329-2858a360-2df7-431a-8b5f-234fd6c5c0d5.png">
 
 
 Testing the application:
