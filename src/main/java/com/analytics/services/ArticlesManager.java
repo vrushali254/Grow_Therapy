@@ -15,18 +15,18 @@ public class ArticlesManager {
 
 
     // Find the weekly/monthly most viewed articles
-    public TopArticlesResponse findMostViewedArticlesByGranularity(Granularity granularity, String year, String month, String day, Integer limit) throws ExecutionException, InterruptedException, IOException {
-        return wikiPageViewClient.findMostViewedArticles(granularity, year, month, day, limit);
+    public TopArticlesResponse findMostViewedArticlesByGranularity(Granularity granularity, String year, String month, String day) throws ExecutionException, InterruptedException, IOException {
+        return wikiPageViewClient.findMostViewedArticles(granularity, year, month, day);
     }
 
     // Find the weekly/monthly view count for a given article
 
-    public ArticleResponse getViewCountForArticleByGranularity(String article, Granularity granularity, String startDate, Integer limit) throws ExecutionException, InterruptedException, IOException {
+    public ArticleResponse getViewCountForArticleByGranularity(String article, Granularity granularity, String startDate) throws ExecutionException, InterruptedException, IOException {
         return wikiPageViewClient.getArticleViewCount(article, granularity, startDate);
     }
 
     // Find the date in a month with most views for a given article
-    public ArticleResponse.ArticlePageView findDayWithMostViewsInMonth(String article, String startDate, Integer limit) throws IOException {
+    public ArticleResponse.ArticlePageView findDayWithMostViewsInMonth(String article, String startDate) throws IOException {
         return wikiPageViewClient.getMostViewedDateForArticle(article, startDate);
 
     }

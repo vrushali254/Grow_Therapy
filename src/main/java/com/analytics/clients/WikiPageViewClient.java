@@ -7,10 +7,9 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface WikiPageViewClient {
-    final static String defaultProject = "/en.wikipedia";
-    final static String defaultAccess = "/all-access";
-
-    final static String defaultAgent = "/all-agents";
+    String defaultProject = "/en.wikipedia";
+    String defaultAccess = "/all-access";
+    String defaultAgent = "/all-agents";
     @GET("metrics/pageviews/top" + defaultProject + defaultAccess + "/{year}/{month}/{day}")
    // @Headers("accept: application/json")
     Call<TopArticlesResponse> getMostViewedArticles(@Path(value = "year") String year,

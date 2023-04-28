@@ -45,7 +45,6 @@ public class DateConverter {
         for(Long i=0L; i<7L; i++) {
             LocalDate nextDate = convertStringToDate(startDate.toString()).plusDays(i);
             nextDays.add(convertLocalDateToString(nextDate));
-
         }
         return nextDays;
     }

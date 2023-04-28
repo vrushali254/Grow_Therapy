@@ -45,18 +45,15 @@ public class WikiPageViewClientImplementation {
     }
 
 
-    public TopArticlesResponse findMostViewedArticles(Granularity granularity, String year, String month, String date, int limit) throws ExecutionException, InterruptedException, IOException {
-        System.out.println("date:" + date);
+    public TopArticlesResponse findMostViewedArticles(Granularity granularity, String year, String month, String date) throws ExecutionException, InterruptedException, IOException {
         if(granularity.equals(Granularity.MONTHLY)) {
             return findMostViewedArticlesByMonth(year, month, "all-days");
         } else {
-            return findMostViewedArticlesByWeek(year, month, date, limit);
+            return findMostViewedArticlesByWeek(year, month, date);
         }
     }
 
     public TopArticlesResponse findMostViewedArticlesByMonth(String year, String month, String date) throws ExecutionException, InterruptedException, IOException {
-        System.out.println("date:" + date);
-
         Call<TopArticlesResponse> call = pageViewClient.getMostViewedArticles(year, month, date);
         Response<TopArticlesResponse> response = call.execute();
         if(!response.isSuccessful()) {
@@ -65,8 +62,7 @@ public class WikiPageViewClientImplementation {
         return response.body();
     }
 
-    public TopArticlesResponse findMostViewedArticlesByWeek(String year, String month, String date, int limit) throws IOException {
-        System.out.println("date:" + date);
+    public TopArticlesResponse findMostViewedArticlesByWeek(String year, String month, String date) throws IOException {
         // Get the dates for the whole week
         List<String> daysInWeek = DateConverter.getDaysInWeek(year, month, date);
         List<Article> articlesInWeek = new ArrayList<>();
@@ -83,7 +79,7 @@ public class WikiPageViewClientImplementation {
             articlesInWeek.addAll(topArticles.getItems().get(0).getArticles());
         }
 
-        List<Article> aggregatedArticles = aggregateWeeklyViews(articlesInWeek, limit);
+        List<Article> aggregatedArticles = aggregateWeeklyViews(articlesInWeek);
         return formatArticles(aggregatedArticles, year, month, date);
 
     }
@@ -98,7 +94,6 @@ public class WikiPageViewClientImplementation {
 
     public ArticleResponse getArticleViewCountByMonth(String article, Granularity granularity, String startDate) throws IOException {
         String endDate = DateConverter.addMonths(startDate, 1L);
-        System.out.println("end: " + endDate);
         Call<ArticleResponse> call = pageViewClient.getArticleViewCount(article, granularity.toString().toLowerCase(), startDate, endDate);
         Response<ArticleResponse> response = call.execute();
         if(!response.isSuccessful()) {
@@ -107,7 +102,7 @@ public class WikiPageViewClientImplementation {
         return response.body();
     }
 
-    public ArticleResponse getArticleViewCountByWeek(String article, String startDate) throws ExecutionException, InterruptedException, IOException {
+    public ArticleResponse getArticleViewCountByWeek(String article, String startDate) throws IOException {
         String endDate = DateConverter.addWeeks(startDate, 1L);
 
         Call<ArticleResponse> call = pageViewClient.getArticleViewCount(article, "daily", startDate, endDate);
@@ -118,16 +113,8 @@ public class WikiPageViewClientImplementation {
         ArticleResponse articleResponse = response.body();
         // Aggregate all the daily views into a single weekly view
         List<ArticleResponse.ArticlePageView> articlePageViews = articleResponse.getArticlePageViews();
-
-        // Merge all view count in a cascading manner
-        for(int i=1; i<articlePageViews.size(); i++) {
-            ArticleResponse.ArticlePageView pageView = articlePageViews.get(i);
-            Long prevViews = articlePageViews.get(i-1).getViews();
-            Long currViews = articlePageViews.get(i).getViews();
-            pageView.setViews(prevViews+currViews);
-            articlePageViews.remove(i-1);
-            i--;
-        }
+        // Merge and update the response
+        mergeAllViewsForArticle(articlePageViews);
         return articleResponse;
     }
 
@@ -143,26 +130,27 @@ public class WikiPageViewClientImplementation {
 
         // Aggregate all the daily views into a single weekly view
         List<ArticleResponse.ArticlePageView> articlePageViews = articleResponse.getArticlePageViews();
+        return findMostViewedDateForArticles(articlePageViews);
+    }
 
+    // Local helper functions
+    private ArticleResponse.ArticlePageView findMostViewedDateForArticles(List<ArticleResponse.ArticlePageView> articlePageViews) {
         // Find the date with the most views
         Long maxViews = Long.MIN_VALUE;
-        int indexOfDayWithMaxViews=0;
+        ArticleResponse.ArticlePageView topArticle = articlePageViews.get(0);
         for(int i=0; i<articlePageViews.size(); i++) {
             ArticleResponse.ArticlePageView pageView = articlePageViews.get(i);
             Long currViews = pageView.getViews();
             if(currViews>maxViews) {
                 maxViews = currViews;
-                indexOfDayWithMaxViews = i;
+                topArticle = articlePageViews.get(i);
             }
         }
-        // Article at dayWithMaxView has the answer
-        ArticleResponse.ArticlePageView topArticle = articlePageViews.get(indexOfDayWithMaxViews);
-
         return topArticle;
     }
 
     //Aggregate the article views in a week
-    private List<Article> aggregateWeeklyViews(List<Article> articlesInWeek, int limit) {
+    private List<Article> aggregateWeeklyViews(List<Article> articlesInWeek) {
         // Create a map of the article to its total weekly views
         Map<String, Long> articleViewMap = createArticleViewMap(articlesInWeek);
         List<Article> aggregatedArticles = new ArrayList<>();
@@ -174,18 +162,12 @@ public class WikiPageViewClientImplementation {
         // Sort the articles in descending based on views.
         aggregatedArticles.sort((Article x, Article y) -> Long.compare(y.getViews(), x.getViews()));
 
-        //Throttle the num of articles by limit
-        if(aggregatedArticles.size()>=limit) {
-            aggregatedArticles = aggregatedArticles.subList(0, limit);
-        }
-
         // Add ranks to the top viewed articles
         rankMostViewedArticles(aggregatedArticles);
 
         return aggregatedArticles;
     }
 
-    // Local helper functions
     private Map<String, Long> createArticleViewMap(List<Article> articlesInWeek) {
         Map<String, Long> articleViewMap = new HashMap<>();
         for(Article article: articlesInWeek) {
@@ -216,5 +198,16 @@ public class WikiPageViewClientImplementation {
         return response;
     }
 
+    private void mergeAllViewsForArticle(List<ArticleResponse.ArticlePageView> articlePageViews) {
+        // Merge all view count in a cascading manner
+        for(int i=1; i<articlePageViews.size(); i++) {
+            ArticleResponse.ArticlePageView pageView = articlePageViews.get(i);
+            Long prevViews = articlePageViews.get(i-1).getViews();
+            Long currViews = articlePageViews.get(i).getViews();
+            pageView.setViews(prevViews+currViews);
+            articlePageViews.remove(i-1);
+            i--;
+        }
+    }
 
 }
