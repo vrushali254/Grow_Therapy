@@ -13,7 +13,6 @@ import java.util.concurrent.ExecutionException;
 public class ArticlesManager {
        WikiPageViewClientImplementation wikiPageViewClient = WikiPageViewClientImplementation.getInstance();
 
-
     // Find the weekly/monthly most viewed articles
     public TopArticlesResponse findMostViewedArticlesByGranularity(Granularity granularity, String year, String month, String day) throws ExecutionException, InterruptedException, IOException {
         return wikiPageViewClient.findMostViewedArticles(granularity, year, month, day);

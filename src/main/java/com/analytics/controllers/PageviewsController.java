@@ -31,13 +31,12 @@ public class PageviewsController {
      * 		200 - returns an array of most viewed articles
      * 		400, 404, 429 - possible response errors from the 3rd API
      */
-    @RequestMapping(value =  {"/articles/top/{granularity}/{year}/{month}/{day}"}, method = RequestMethod.GET)
+    @RequestMapping(value={"/articles/top/{granularity}/{year}/{month}/{day}"}, method=RequestMethod.GET)
     public TopArticlesResponse getMostViewedArticles(@PathVariable(name="granularity", required = true) Granularity granularity,
                                                      @PathVariable(name="year", required = true) String year,
                                                      @PathVariable(name="month", required = true) String month,
-                                                     @PathVariable(name ="day", required = true) String day) throws RuntimeException, ExecutionException, InterruptedException, IOException {
+                                                     @PathVariable(name="day", required = true) String day) throws RuntimeException, ExecutionException, InterruptedException, IOException {
         return articlesManager.findMostViewedArticlesByGranularity(granularity, year, month, day);
-
     }
 
     /**
@@ -52,8 +51,8 @@ public class PageviewsController {
      * 		200 - returns an array of page views for an article
      * 		400, 404, 429 - possible response errors from the 3rd API
      */
-    @RequestMapping(value =  "/articles/{articleId}/pageviews/{granularity}/{start_date}", method = RequestMethod.GET)
-    public ArticleResponse getViewCountForArticle(@PathVariable(name = "articleId", required = true) String articleId,
+    @RequestMapping(value="/articles/{articleId}/pageviews/{granularity}/{start_date}", method=RequestMethod.GET)
+    public ArticleResponse getViewCountForArticle(@PathVariable(name="articleId", required = true) String articleId,
                                                   @PathVariable(name="granularity", required = true) Granularity granularity,
                                                   @PathVariable(name="start_date", required = true) String start_date) throws RuntimeException, ExecutionException, InterruptedException, IOException {
 
@@ -61,7 +60,7 @@ public class PageviewsController {
     }
 
     /**
-     * GET /articles/{articleId}/top/daily/{start_date}
+     * GET /articles/{articleId}/top/monthly/{start_date}
      * Returns the date with the most page views for an article in a month
      *
      * @param articleId - Name of the article
@@ -71,9 +70,9 @@ public class PageviewsController {
      * 		200 - returns an array of page views for an article
      * 		400, 404, 429 - possible response errors from the 3rd API
      */
-    @RequestMapping(value = "/articles/{articleId}/top/daily/{start_date}", method = RequestMethod.GET)
+    @RequestMapping(value = "/articles/{articleId}/top/monthly/{start_date}", method = RequestMethod.GET)
     public ArticleResponse.ArticlePageView getDayWithMostViewCountForArticle(
-            @PathVariable(name = "articleId", required = true) String articleId,
+            @PathVariable(name="articleId", required = true) String articleId,
             @PathVariable(name="start_date", required = true) String start_date) throws RuntimeException, IOException {
         return articlesManager.findDayWithMostViewsInMonth(articleId, start_date);
     }

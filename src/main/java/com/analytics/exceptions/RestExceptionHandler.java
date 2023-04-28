@@ -13,8 +13,7 @@ import java.io.IOException;
 public class RestExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<String> handleHttpError(ResponseStatusException ex) {
-        String message = ex.getReason();
-        return new ResponseEntity<>(message, ex.getStatus());
+        return new ResponseEntity<>(ex.getReason(), ex.getStatus());
     }
 
     public static void parseAndThrowException(Response<?> response) {
