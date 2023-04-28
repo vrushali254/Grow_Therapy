@@ -62,7 +62,7 @@ public class PageviewsController {
     }
 
     /**
-     * GET /articles/{articleId}/top/monthly/{start_date}
+     * GET /articles/{articleId}/top/daily/{start_date}
      * Returns the date with the most page views for an article in a month
      *
      * @param articleId - Name of the article
@@ -72,7 +72,7 @@ public class PageviewsController {
      * 		200 - returns an array of page views for an article
      * 		422 - validation errors from the input parameters
      */
-    @RequestMapping(value =  "/articles/{articleId}/top/daily/{start_date}", method = RequestMethod.GET)
+    @RequestMapping(value = "/articles/{articleId}/top/daily/{start_date}", method = RequestMethod.GET)
     public ArticleResponse.ArticlePageView getDayWithMostViewCountForArticle(
             @PathVariable(name = "articleId", required = true) String articleId,
             @PathVariable(name="start_date", required = true) String start_date) throws RuntimeException, IOException {
