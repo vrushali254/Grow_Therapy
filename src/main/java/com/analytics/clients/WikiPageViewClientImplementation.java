@@ -1,21 +1,22 @@
 package com.analytics.clients;
 
+import com.analytics.exceptions.RestExceptionHandler;
 import com.analytics.models.Article;
 import com.analytics.models.Item;
 import com.analytics.responses.ArticleResponse;
 import com.analytics.responses.TopArticlesResponse;
 import com.analytics.utils.DateConverter;
 import com.analytics.utils.Granularity;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 
@@ -55,13 +56,16 @@ public class WikiPageViewClientImplementation {
 
     public TopArticlesResponse findMostViewedArticlesByMonth(String year, String month, String date) throws ExecutionException, InterruptedException, IOException {
         System.out.println("date:" + date);
-        CompletableFuture<TopArticlesResponse> call = pageViewClient.getMostViewedArticles(year, month, date);
-        TopArticlesResponse response = call.get();
-        System.out.println("daily " + response.toString());
-        return response;
+
+        Call<TopArticlesResponse> call = pageViewClient.getMostViewedArticles(year, month, date);
+        Response<TopArticlesResponse> response = call.execute();
+        if(!response.isSuccessful()) {
+            RestExceptionHandler.parseAndThrowException(response);
+        }
+        return response.body();
     }
 
-    public TopArticlesResponse findMostViewedArticlesByWeek(String year, String month, String date, int limit) throws ExecutionException, InterruptedException, IOException {
+    public TopArticlesResponse findMostViewedArticlesByWeek(String year, String month, String date, int limit) throws IOException {
         System.out.println("date:" + date);
         // Get the dates for the whole week
         List<String> daysInWeek = DateConverter.getDaysInWeek(year, month, date);
@@ -70,10 +74,13 @@ public class WikiPageViewClientImplementation {
         // Get top views for each day in the week
         for(String nextDate:daysInWeek) {
             String[] dateTokens = DateConverter.splitDate(nextDate);
-            CompletableFuture<TopArticlesResponse> call = pageViewClient.getMostViewedArticles(dateTokens[0], dateTokens[1], dateTokens[2]);
-            TopArticlesResponse response = call.get();
-            System.out.println("Weekly: " + response.toString());
-            articlesInWeek.addAll(response.getItems().get(0).getArticles());
+            Call<TopArticlesResponse> call = pageViewClient.getMostViewedArticles(dateTokens[0], dateTokens[1], dateTokens[2]);
+            Response<TopArticlesResponse> response = call.execute();
+            if(!response.isSuccessful()) {
+                RestExceptionHandler.parseAndThrowException(response);
+            }
+            TopArticlesResponse topArticles = response.body();
+            articlesInWeek.addAll(topArticles.getItems().get(0).getArticles());
         }
 
         List<Article> aggregatedArticles = aggregateWeeklyViews(articlesInWeek, limit);
@@ -81,7 +88,7 @@ public class WikiPageViewClientImplementation {
 
     }
 
-    public ArticleResponse getArticleViewCount(String article, Granularity granularity, String startDate) throws ParseException, ExecutionException, InterruptedException {
+    public ArticleResponse getArticleViewCount(String article, Granularity granularity, String startDate) throws IOException, ExecutionException, InterruptedException {
         if(granularity.equals(Granularity.MONTHLY)) {
             return getArticleViewCountByMonth(article, granularity, startDate);
         } else {
@@ -89,22 +96,28 @@ public class WikiPageViewClientImplementation {
         }
     }
 
-    public ArticleResponse getArticleViewCountByMonth(String article, Granularity granularity, String startDate) throws ExecutionException, InterruptedException {
+    public ArticleResponse getArticleViewCountByMonth(String article, Granularity granularity, String startDate) throws IOException {
         String endDate = DateConverter.addMonths(startDate, 1L);
         System.out.println("end: " + endDate);
-        CompletableFuture<ArticleResponse> call = pageViewClient.getArticleViewCount(article, granularity.toString().toLowerCase(), startDate, endDate);
-        ArticleResponse response  = call.get();
-        return response;
+        Call<ArticleResponse> call = pageViewClient.getArticleViewCount(article, granularity.toString().toLowerCase(), startDate, endDate);
+        Response<ArticleResponse> response = call.execute();
+        if(!response.isSuccessful()) {
+            RestExceptionHandler.parseAndThrowException(response);
+        }
+        return response.body();
     }
 
-    public ArticleResponse getArticleViewCountByWeek(String article, String startDate) throws ExecutionException, InterruptedException {
+    public ArticleResponse getArticleViewCountByWeek(String article, String startDate) throws ExecutionException, InterruptedException, IOException {
         String endDate = DateConverter.addWeeks(startDate, 1L);
 
-        CompletableFuture<ArticleResponse> call = pageViewClient.getArticleViewCount(article, "daily", startDate, endDate);
-        ArticleResponse response  = call.get();
-
+        Call<ArticleResponse> call = pageViewClient.getArticleViewCount(article, "daily", startDate, endDate);
+        Response<ArticleResponse> response = call.execute();
+        if(!response.isSuccessful()) {
+            RestExceptionHandler.parseAndThrowException(response);
+        }
+        ArticleResponse articleResponse = response.body();
         // Aggregate all the daily views into a single weekly view
-        List<ArticleResponse.ArticlePageView> articlePageViews = response.getArticlePageViews();
+        List<ArticleResponse.ArticlePageView> articlePageViews = articleResponse.getArticlePageViews();
 
         // Merge all view count in a cascading manner
         for(int i=1; i<articlePageViews.size(); i++) {
@@ -115,17 +128,21 @@ public class WikiPageViewClientImplementation {
             articlePageViews.remove(i-1);
             i--;
         }
-        return response;
+        return articleResponse;
     }
 
-    public ArticleResponse.ArticlePageView getMostViewedDateForArticle(String article,  String startDate) throws ExecutionException, InterruptedException {
+    public ArticleResponse.ArticlePageView getMostViewedDateForArticle(String article,  String startDate) throws IOException {
         String endDate = DateConverter.addMonths(startDate, 1L);
 
-        CompletableFuture<ArticleResponse> call = pageViewClient.getArticleViewCount(article, "daily", startDate, endDate);
-        ArticleResponse response  = call.get();
+        Call<ArticleResponse> call = pageViewClient.getArticleViewCount(article, "daily", startDate, endDate);
+        Response<ArticleResponse> response = call.execute();
+        if(!response.isSuccessful()) {
+            RestExceptionHandler.parseAndThrowException(response);
+        }
+        ArticleResponse articleResponse = response.body();
 
         // Aggregate all the daily views into a single weekly view
-        List<ArticleResponse.ArticlePageView> articlePageViews = response.getArticlePageViews();
+        List<ArticleResponse.ArticlePageView> articlePageViews = articleResponse.getArticlePageViews();
 
         // Find the date with the most views
         Long maxViews = Long.MIN_VALUE;

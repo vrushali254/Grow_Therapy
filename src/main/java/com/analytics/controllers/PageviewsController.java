@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -60,7 +59,7 @@ public class PageviewsController {
     public ArticleResponse getViewCountForArticle(@PathVariable(name = "articleId", required = true) String articleId,
                                                   @PathVariable(name="granularity", required = true) Granularity granularity,
                                                   @PathVariable(name="start_date", required = true) String start_date,
-                                                  @RequestParam(name="limit", required = true, defaultValue = "1000") Integer limit) throws RuntimeException, ExecutionException, InterruptedException, ParseException {
+                                                  @RequestParam(name="limit", required = true, defaultValue = "1000") Integer limit) throws RuntimeException, ExecutionException, InterruptedException, IOException {
 
         return articlesManager.getViewCountForArticleByGranularity(articleId, granularity, start_date, limit);
     }
@@ -80,7 +79,7 @@ public class PageviewsController {
     @RequestMapping(value =  "/articles/{articleId}/top/daily/{start_date}", method = RequestMethod.GET)
     public ArticleResponse.ArticlePageView getDayWithMostViewCountForArticle(@PathVariable(name = "articleId", required = true) String articleId,
                                                 @PathVariable(name="start_date", required = true) String start_date,
-                                                @RequestParam(name="limit", required = true, defaultValue = "1000") Integer limit) throws RuntimeException, ExecutionException, InterruptedException, ParseException {
+                                                @RequestParam(name="limit", required = true, defaultValue = "1000") Integer limit) throws RuntimeException, IOException {
         return articlesManager.findDayWithMostViewsInMonth(articleId, start_date, limit);
     }
 

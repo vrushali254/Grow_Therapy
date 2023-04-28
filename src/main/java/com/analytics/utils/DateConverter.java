@@ -1,12 +1,16 @@
 package com.analytics.utils;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DateConverter {
-    //YYYYMMDD
+    //Format YYYYMMDD
     final static DateTimeFormatter basicFormatter = DateTimeFormatter.BASIC_ISO_DATE;
 
     final static DateTimeFormatter localFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
@@ -15,7 +19,11 @@ public class DateConverter {
     }
 
     public static LocalDate convertStringToDate(String date) {
-        return LocalDate.parse(date, basicFormatter);
+        try {
+            return LocalDate.parse(date, basicFormatter);
+        } catch (DateTimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input format found: " + e.getMessage());
+        }
     }
 
     public static String convertLocalDateToString(LocalDate date) {return localFormatter.format(date).toString();}
